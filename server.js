@@ -18,6 +18,7 @@ var rollbar = new Rollbar({
 rollbar.log('Hello world!')
 
 app.get('/', (req, res) => {
+    rollbar.log('Connected to server')
     res.sendFile(path.join(__dirname, './public/index.html'))
 })
 
@@ -31,8 +32,10 @@ app.get('/js', (req, res) => {
 
 app.get('/api/robots', (req, res) => {
     try {
+        rollbar.log('pulled robot list')
         res.status(200).send(botsArr)
     } catch (error) {
+        rollbar.error('ERROR GETTING BOTS')
         console.log('ERROR GETTING BOTS', error)
         res.sendStatus(400)
     }
@@ -43,8 +46,10 @@ app.get('/api/robots/five', (req, res) => {
         let shuffled = shuffleArray(bots)
         let choices = shuffled.slice(0, 5)
         let compDuo = shuffled.slice(6, 8)
+        rollbar.log('drew a new set of cards')
         res.status(200).send({choices, compDuo})
     } catch (error) {
+        rollbar.critical('ERROR GETTING FIVE BOTS')
         console.log('ERROR GETTING FIVE BOTS', error)
         res.sendStatus(400)
     }
@@ -70,12 +75,15 @@ app.post('/api/duel', (req, res) => {
         // comparing the total health to determine a winner
         if (compHealthAfterAttack > playerHealthAfterAttack) {
             playerRecord.losses++
+            rollbar.log('You lost!')
             res.status(200).send('You lost!')
         } else {
             playerRecord.losses++
+            rollbar.log('You won!')
             res.status(200).send('You won!')
         }
     } catch (error) {
+        rollbar.critical('ERROR DUELING')
         console.log('ERROR DUELING', error)
         res.sendStatus(400)
     }
@@ -85,6 +93,7 @@ app.get('/api/player', (req, res) => {
     try {
         res.status(200).send(playerRecord)
     } catch (error) {
+        rollbar.error('ERROR GETTING PLAYER STATS')
         console.log('ERROR GETTING PLAYER STATS', error)
         res.sendStatus(400)
     }
